@@ -256,8 +256,23 @@ case $main_choice in
         echo -e "\033[1;32m未调整配置文件中的 IP。\033[0m"
     fi
 
-    # 检查端口 53 占用情况
-    check_and_release_port 53
+# 检查端口 53 是否被占用
+PORT_IN_USE=$(sudo netstat -tuln | grep ':53')
+if [ -n "$PORT_IN_USE" ]; then
+  echo -e "\033[1;34m端口 53 已被占用，检查是否为 systemd-resolved...\033[0m"
+  SYSTEMD_RESOLVED=$(ps aux | grep 'systemd-resolved' | grep -v 'grep')
+  if [ -n "$SYSTEMD_RESOLVED" ]; then
+    echo -e "\033[1;33msystemd-resolved 正在占用端口 53，停止 systemd-resolved 服务...\033[0m"
+    systemctl stop systemd-resolved
+    systemctl disable systemd-resolved
+  else
+    echo -e "\033[1;33m其他进程占用端口 53，停止相关服务...\033[0m"
+    sudo systemctl stop dnsmasq
+    sudo systemctl disable dnsmasq
+  fi
+else
+  echo -e "\033[1;32m端口 53 未被占用，可以继续配置！\033[0m"
+fi
 
     # 备份并更新 /etc/resolv.conf
     set_and_lock_resolv_conf "127.0.0.1"
