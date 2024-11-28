@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.4"
+VERSION="V_1.0.0"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -125,6 +125,46 @@ set_and_lock_resolv_conf() {
   echo -e "\033[1;32m操作成功！当前 nameserver 已设置为 $nameserver 并已锁定。\033[0m"
 }
 
+# 判断系统类型并升级系统
+get_package_manager() {
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        OS_NAME=$ID
+        OS_VERSION=$VERSION_ID
+    else
+        echo -e "\033[31m[错误] 无法检测系统信息！\033[0m"
+        exit 1
+    fi
+
+    case "$OS_NAME" in
+        ubuntu|debian)
+            PACKAGE_MANAGER="apt"
+            ;;
+        alpine)
+            PACKAGE_MANAGER="apk"
+            ;;
+        *)
+            echo -e "\033[31m[错误] 不支持的系统：$OS_NAME\033[0m"
+            exit 1
+            ;;
+    esac
+}
+
+# 升级系统和包管理器
+upgrade_system() {
+    get_package_manager
+    
+    if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+        echo -e "\033[1;33m开始升级系统...\033[0m"
+        sudo apt update && sudo apt upgrade -y
+        sudo apt install -y curl dnsmasq lsof
+    elif [[ "$PACKAGE_MANAGER" == "apk" ]]; then
+        echo -e "\033[1;33m开始升级系统...\033[0m"
+        sudo apk update && sudo apk upgrade
+        sudo apk add curl dnsmasq lsof
+    fi
+}
+
 # 显示标题和备注
 echo -e "\033[1;34m======================================\033[0m"
 echo -e "\033[1;32m       一键配置 dnsmasq 分流脚本       \033[0m"
@@ -163,6 +203,9 @@ case $main_choice in
   
   case $dnsmasq_choice in
     1)
+    # 升级系统和包管理器
+    upgrade_system
+    
     # 安装并配置 dnsmasq
     echo "执行安装 dnsmasq 的相关操作..."
     
