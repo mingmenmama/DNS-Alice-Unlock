@@ -33,20 +33,23 @@ fi
 # 指定配置文件的下载地址
 CONFIG_URL="https://raw.githubusercontent.com/Jimmyzxk/DNS-Alice-Unlock/refs/heads/main/dnsmasq.conf"
 CONFIG_FILE="/etc/dnsmasq.conf"
-SCRIPT_NAME="dns-unlock.sh"
+SCRIPT_NAME="dnsunlock-beta.sh"
 SCRIPT_PATH="/root/$SCRIPT_NAME"
-SYMLINK_PATH="/usr/local/bin/ddns"
+SYMLINK_PATH="/usr/local/bin/ddnsb"
 AUTHOR="Jimmydada"
 
-# 检查并创建 ddns 快捷命令（符号链接）
+# 检查并创建 ddnsb 快捷命令（符号链接）
 create_symlink() {
+  SYMLINK_PATH="/usr/local/bin/ddnsb"  # 快捷命令的目标路径
+  SCRIPT_PATH="/path/to/your/script"   # 脚本的实际路径（需要替换为脚本的真实路径）
+
   if [ ! -f "$SYMLINK_PATH" ]; then
-    echo -e "\033[1;32m首次运行，创建快捷命令 ddns...\033[0m"
+    echo -e "\033[1;32m首次运行，创建快捷命令 ddnsb...\033[0m"
     sudo ln -sf "$SCRIPT_PATH" "$SYMLINK_PATH"
     sudo chmod +x "$SYMLINK_PATH"
-    echo -e "\033[1;32m快捷命令 ddns 创建成功！\033[0m"
+    echo -e "\033[1;32m快捷命令 ddnsb 创建成功！\033[0m"
   else
-    echo -e "\033[1;33m快捷指令 ddns 快速进入设置\033[0m"
+    echo -e "\033[1;33m快捷指令 ddnsb 已存在，快速进入设置\033[0m"
   fi
 }
 
