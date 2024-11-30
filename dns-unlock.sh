@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.5"
+VERSION="V_1.2.6"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -268,11 +268,50 @@ case $main_choice in
     
   2)
     # 卸载 dnsmasq 并恢复默认配置
-    echo "执行卸载 dnsmasq 的相关操作..."
-    apt-get purge -y dnsmasq
-    systemctl disable --now dnsmasq
-    rm -f $CONFIG_FILE
-    echo -e "\033[1;32mdnsmasq 已成功卸载并恢复默认配置！\033[0m"
+    echo -e "\033[1;33m正在卸载 dnsmasq 并恢复系统默认配置...\033[0m"
+
+    # 卸载 dnsmasq
+    sudo apt-get purge -y dnsmasq
+    if [ $? -eq 0 ]; then
+        echo -e "\033[1;32mdnsmasq 已成功卸载！\033[0m"
+    else
+        echo -e "\033[31m卸载 dnsmasq 失败，请检查权限或网络。\033[0m"
+        exit 1
+    fi
+
+    # 禁用 dnsmasq 服务
+    sudo systemctl disable --now dnsmasq &> /dev/null
+    echo -e "\033[1;32mdnsmasq 服务已停止并禁用。\033[0m"
+
+    # 删除残留配置文件
+    CONFIG_FILE="/etc/dnsmasq.conf"
+    if [ -f "$CONFIG_FILE" ]; then
+        sudo rm -f "$CONFIG_FILE"
+        echo -e "\033[1;32m残留配置文件已清理：$CONFIG_FILE\033[0m"
+    fi
+
+    # 恢复系统 DNS 配置
+    echo -e "\033[1;33m正在恢复系统 DNS 配置到 8.8.8.8...\033[0m"
+    RESOLV_FILE="/etc/resolv.conf"
+    if [ -f "$RESOLV_FILE" ]; then
+        sudo chattr -i "$RESOLV_FILE" &> /dev/null  # 解除锁定
+        echo -e "nameserver 8.8.8.8" | sudo tee "$RESOLV_FILE" > /dev/null
+        sudo chattr +i "$RESOLV_FILE" &> /dev/null  # 锁定配置
+        echo -e "\033[1;32m系统 DNS 已恢复为 8.8.8.8。\033[0m"
+    else
+        echo -e "\033[31m未找到 $RESOLV_FILE 文件，请手动检查。\033[0m"
+    fi
+
+    # 重启网络服务
+    echo -e "\033[1;33m正在重启网络服务...\033[0m"
+    sudo systemctl restart systemd-resolved
+    if [ $? -eq 0 ]; then
+        echo -e "\033[1;32m网络服务已成功重启。\033[0m"
+    else
+        echo -e "\033[31m重启网络服务失败，请检查日志。\033[0m"
+    fi
+
+    echo -e "\033[1;32mdnsmasq 已成功卸载，系统 DNS 恢复完成！\033[0m"
     ;;
 
 3)
@@ -529,26 +568,45 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
 
  3)
     # 卸载 smartdns 并恢复默认 resolv.conf 配置
-    echo -e "\033[1;34m卸载 smartdns 并恢复默认 resolv.conf 配置...\033[0m"
+    echo -e "\033[1;34m正在卸载 smartdns 并恢复默认 resolv.conf 配置...\033[0m"
 
     # 卸载 smartdns
     apt-get purge -y smartdns
     if [ $? -eq 0 ]; then
-      echo -e "\033[1;32msmartdns 已成功卸载！\033[0m"
+        echo -e "\033[1;32msmartdns 已成功卸载！\033[0m"
     else
-      echo -e "\033[31m[错误] 卸载 smartdns 失败！\033[0m"
-      exit 1
+        echo -e "\033[31m[错误] 卸载 smartdns 失败，请检查权限或网络连接！\033[0m"
+        exit 1
     fi
 
     # 恢复默认 resolv.conf 配置
-    if [ -f /etc/resolv.conf.bak ]; then
-      echo -e "\033[1;34m恢复原始 /etc/resolv.conf 配置...\033[0m"
-      cp /etc/resolv.conf.bak /etc/resolv.conf
-      chattr -i /etc/resolv.conf
-      echo -e "\033[1;32m已恢复原始配置！\033[0m"
+    RESOLV_FILE="/etc/resolv.conf"
+    RESOLV_BAK="/etc/resolv.conf.bak"
+    if [ -f "$RESOLV_BAK" ]; then
+        echo -e "\033[1;34m正在恢复原始 resolv.conf 配置...\033[0m"
+        sudo chattr -i "$RESOLV_FILE" &> /dev/null  # 解锁 resolv.conf 文件
+        sudo cp "$RESOLV_BAK" "$RESOLV_FILE"
+        sudo chattr +i "$RESOLV_FILE" &> /dev/null  # 锁定配置，防止被覆盖
+        echo -e "\033[1;32m原始 resolv.conf 配置已成功恢复！\033[0m"
     else
-      echo -e "\033[31m[错误] 找不到备份文件 /etc/resolv.conf.bak！\033[0m"
+        echo -e "\033[31m[错误] 找不到备份文件 $RESOLV_BAK，无法恢复默认配置！\033[0m"
+        echo -e "\033[1;33m将 resolv.conf 设置为 Google 公共 DNS（8.8.8.8）...\033[0m"
+        sudo chattr -i "$RESOLV_FILE" &> /dev/null
+        echo -e "nameserver 8.8.8.8" | sudo tee "$RESOLV_FILE" > /dev/null
+        sudo chattr +i "$RESOLV_FILE" &> /dev/null
+        echo -e "\033[1;32m系统 DNS 已设置为 8.8.8.8。\033[0m"
     fi
+
+    # 重启系统 DNS 服务
+    echo -e "\033[1;34m正在重启系统 DNS 服务...\033[0m"
+    sudo systemctl restart systemd-resolved
+    if [ $? -eq 0 ]; then
+        echo -e "\033[1;32m系统 DNS 服务已成功重启！\033[0m"
+    else
+        echo -e "\033[31m[错误] 系统 DNS 服务重启失败，请检查日志！\033[0m"
+    fi
+
+    echo -e "\033[1;32msmartdns 卸载完成，系统 DNS 恢复完成！\033[0m"
     ;;
 
     4)
