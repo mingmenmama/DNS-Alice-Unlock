@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.6"
+VERSION="V_1.2.7"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -154,6 +154,52 @@ check_and_install_software() {
             echo -e "\033[1;32m$software 已安装。\033[0m"
         fi
     done
+}
+
+install_smartdns() {
+    # 检测系统类型
+    SYSTEM_NAME=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+    echo -e "\033[1;34m检测到当前系统为：$SYSTEM_NAME\033[0m"
+
+    # 检查 SmartDNS 是否已经安装
+    if command -v smartdns >/dev/null 2>&1; then
+        echo -e "\033[1;32mSmartDNS 已安装，无需重复安装。\033[0m"
+        return
+    fi
+
+    if [[ "$SYSTEM_NAME" == "ubuntu" ]]; then
+        echo -e "\033[1;34mUbuntu 系统，使用 DEB 包安装 SmartDNS...\033[0m"
+        DEB_URL="https://github.com/paldier/smartdns/releases/download/Release-VERSION/smartdns.1.2024.06.12-2222.x86_64.deb"
+        TEMP_DEB="/tmp/smartdns.deb"
+
+        wget "$DEB_URL" -O "$TEMP_DEB"
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m[错误] SmartDNS 安装包下载失败，请检查网络连接！\033[0m"
+            exit 1
+        fi
+
+        dpkg -i "$TEMP_DEB"
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m[警告] 安装依赖失败，尝试修复...\033[0m"
+            apt-get -f install -y
+        fi
+
+        rm -f "$TEMP_DEB"
+    else
+        echo -e "\033[1;34m非 Ubuntu 系统，使用 apt 安装 SmartDNS...\033[0m"
+        apt update && apt install -y smartdns
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m[错误] SmartDNS 安装失败，请检查系统环境！\033[0m"
+            exit 1
+        fi
+    fi
+
+    if command -v smartdns >/dev/null 2>&1; then
+        echo -e "\033[1;32mSmartDNS 安装成功！\033[0m"
+    else
+        echo -e "\033[31m[错误] SmartDNS 安装失败，请检查手动安装！\033[0m"
+        exit 1
+    fi
 }
 
 # 显示标题和备注
@@ -439,18 +485,13 @@ case $main_choice in
   case $smartdns_choice in
 1)
 # 更新系统和包管理器
-    update_system
+update_system
 
 # 检测并安装必要软件
-    check_and_install_software
-    
+check_and_install_software
+
 # 安装 smartdns
-echo -e "\033[1;34m正在安装 smartdns...\033[0m"
-apt update && apt install -y smartdns
-if [ $? -ne 0 ]; then
-  echo -e "\033[31m[错误] smartdns 安装失败，请检查系统环境！\033[0m"
-  exit 1
-fi
+install_smartdns
 
 # 下载 smartdns 配置文件
 echo -e "\033[1;34m正在下载 smartdns 配置文件...\033[0m"
