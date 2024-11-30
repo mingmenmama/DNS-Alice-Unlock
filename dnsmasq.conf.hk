@@ -194,3 +194,9 @@ server=/neulion.com/154.12.177.22
 server=/nbaprop.tt.omtrdc.net/154.12.177.22
 server=/lion-nba-msl.akamaized.net/154.12.177.22
 server=/nbanlds19vod.akamaized.net/154.12.177.22
+
+# > Claude 解锁 SG
+server=/cdn.usefathom.com/154.12.177.22
+server=/anthropic.com/154.12.177.22
+server=/claude.ai/154.12.177.22
+server=/claudeusercontent.com/154.12.177.22
