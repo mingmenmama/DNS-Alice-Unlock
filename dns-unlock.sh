@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.7"
+VERSION="V_1.2.8"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -169,7 +169,7 @@ install_smartdns() {
 
     if [[ "$SYSTEM_NAME" == "ubuntu" ]]; then
         echo -e "\033[1;34mUbuntu 系统，使用 DEB 包安装 SmartDNS...\033[0m"
-        DEB_URL="https://github.com/paldier/smartdns/releases/download/Release-VERSION/smartdns.1.2024.06.12-2222.x86_64.deb"
+        DEB_URL="https://github.com/pymumu/smartdns/releases/download/Release46/smartdns.1.2024.06.12-2222.x86_64-debian-all.deb"
         TEMP_DEB="/tmp/smartdns.deb"
 
         wget "$DEB_URL" -O "$TEMP_DEB"
