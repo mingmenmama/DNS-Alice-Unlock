@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.9"
+VERSION="V_1.3.0"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -133,18 +133,24 @@ stop_services_using_port_53() {
             sudo systemctl disable dnsmasq
         fi
 
-        # 检查并停止任何其他可能占用端口 53 的进程
-        OTHER_PROCESSES=$(sudo lsof -i :53 | grep -v 'grep' | awk '{print $2}' | uniq)
-        if [ -n "$OTHER_PROCESSES" ]; then
-            echo -e "\033[1;33m发现其他进程占用端口 53，强制停止这些进程...\033[0m"
-            for pid in $OTHER_PROCESSES; do
-                sudo kill -9 $pid
-                echo -e "\033[1;31m已强制停止进程 PID: $pid\033[0m"
-            done
-        fi
-    else
-        echo -e "\033[1;32m端口 53 未被占用，可以继续配置！\033[0m"
-    fi
+  # 强制停止占用端口 53 的所有进程
+  echo -e "\033[1;33m发现其他进程占用端口 53，强制停止这些进程...\033[0m"
+  PIDS=$(sudo lsof -t -i :53)
+  if [ -n "$PIDS" ]; then
+    for PID in $PIDS; do
+      if [[ "$PID" =~ ^[0-9]+$ ]]; then
+        sudo kill -9 "$PID"
+        echo -e "\033[1;32m已强制停止进程 PID: $PID\033[0m"
+      else
+        echo -e "\033[1;31m无效的 PID: $PID，跳过...\033[0m"
+      fi
+    done
+  else
+    echo -e "\033[1;32m没有发现占用端口 53 的进程。\033[0m"
+  fi
+else
+  echo -e "\033[1;32m端口 53 未被占用，可以继续配置！\033[0m"
+fi
 }
 
 
