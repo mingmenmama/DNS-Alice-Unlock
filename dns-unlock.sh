@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.8"
+VERSION="V_1.2.9"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -109,6 +109,42 @@ check_and_release_port() {
   else
     echo -e "\033[1;32m端口 $port 未被占用。\033[0m"
   fi
+}
+
+# 检查并停止占用端口 53 的服务
+stop_services_using_port_53() {
+    PORT_IN_USE=$(sudo netstat -tuln | grep ':53')
+    if [ -n "$PORT_IN_USE" ]; then
+        echo -e "\033[1;34m端口 53 已被占用，检查是否为 systemd-resolved...\033[0m"
+        
+        # 检查是否是 systemd-resolved 占用了端口
+        SYSTEMD_RESOLVED=$(ps aux | grep 'systemd-resolved' | grep -v 'grep')
+        if [ -n "$SYSTEMD_RESOLVED" ]; then
+            echo -e "\033[1;33msystemd-resolved 正在占用端口 53，停止 systemd-resolved 服务...\033[0m"
+            sudo systemctl stop systemd-resolved
+            sudo systemctl disable systemd-resolved
+        fi
+
+        # 检查并停止 dnsmasq 服务
+        DNSMASQ=$(ps aux | grep 'dnsmasq' | grep -v 'grep')
+        if [ -n "$DNSMASQ" ]; then
+            echo -e "\033[1;33mdnsmasq 正在占用端口 53，停止 dnsmasq 服务...\033[0m"
+            sudo systemctl stop dnsmasq
+            sudo systemctl disable dnsmasq
+        fi
+
+        # 检查并停止任何其他可能占用端口 53 的进程
+        OTHER_PROCESSES=$(sudo lsof -i :53 | grep -v 'grep' | awk '{print $2}' | uniq)
+        if [ -n "$OTHER_PROCESSES" ]; then
+            echo -e "\033[1;33m发现其他进程占用端口 53，强制停止这些进程...\033[0m"
+            for pid in $OTHER_PROCESSES; do
+                sudo kill -9 $pid
+                echo -e "\033[1;31m已强制停止进程 PID: $pid\033[0m"
+            done
+        fi
+    else
+        echo -e "\033[1;32m端口 53 未被占用，可以继续配置！\033[0m"
+    fi
 }
 
 
@@ -533,23 +569,8 @@ else
   echo -e "\033[1;33m保持默认 IP 配置！\033[0m"
 fi
 
-# 检查端口 53 是否被占用
-PORT_IN_USE=$(sudo netstat -tuln | grep ':53')
-if [ -n "$PORT_IN_USE" ]; then
-  echo -e "\033[1;34m端口 53 已被占用，检查是否为 systemd-resolved...\033[0m"
-  SYSTEMD_RESOLVED=$(ps aux | grep 'systemd-resolved' | grep -v 'grep')
-  if [ -n "$SYSTEMD_RESOLVED" ]; then
-    echo -e "\033[1;33msystemd-resolved 正在占用端口 53，停止 systemd-resolved 服务...\033[0m"
-    systemctl stop systemd-resolved
-    systemctl disable systemd-resolved
-  else
-    echo -e "\033[1;33m其他进程占用端口 53，停止相关服务...\033[0m"
-    sudo systemctl stop dnsmasq
-    sudo systemctl disable dnsmasq
-  fi
-else
-  echo -e "\033[1;32m端口 53 未被占用，可以继续配置！\033[0m"
-fi
+# 调用函数来检查和停止端口占用的服务
+stop_services_using_port_53
 
 # 检查 /etc/resolv.conf 文件是否被锁定，如果已锁定则解锁
 if lsattr /etc/resolv.conf | grep -q 'i'; then
