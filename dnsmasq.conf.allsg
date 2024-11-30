@@ -854,8 +854,11 @@ server=/oaiusercontent.com/157.20.104.47
 server=/exhentai.org/157.20.104.47
 server=/e-hentai.org/157.20.104.47
 # > Claude 2
+server=/cdn.usefathom.com/157.20.104.47
 server=/anthropic.com/157.20.104.47
 server=/claude.ai/157.20.104.47
+server=/claudeusercontent.com/157.20.104.47
+
 # > Google Gemini
 server=/gemini.google.com/157.20.104.47
 server=/proactivebackend-pa.googleapis.com/157.20.104.47
