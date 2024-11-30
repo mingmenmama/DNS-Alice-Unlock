@@ -860,8 +860,12 @@ nameserver /oaiusercontent.com/sg
 nameserver /exhentai.org/sg
 nameserver /e-hentai.org/sg
 # > Claude 2
-nameserver /anthropic.com/sg
+nameserver /cdn.usefathom.com/sg
 nameserver /claude.ai/sg
+nameserver /anthropic.com/sg
+nameserver /claudeusercontent.com/sg
+
+
 # > Google Gemini
 nameserver /gemini.google.com/sg
 nameserver /proactivebackend-pa.googleapis.com/sg
