@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.2.4"
+VERSION="V_1.2.5"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -125,6 +125,37 @@ set_and_lock_resolv_conf() {
   echo -e "\033[1;32m操作成功！当前 nameserver 已设置为 $nameserver 并已锁定。\033[0m"
 }
 
+# 公共函数 - 更新系统和包管理器
+update_system() {
+    echo -e "\033[1;33m正在更新系统和包管理器...\033[0m"
+    sudo apt-get update -y && sudo apt-get upgrade -y
+    if [ $? -eq 0 ]; then
+        echo -e "\033[1;32m系统和包管理器已更新至最新版本！\033[0m"
+    else
+        echo -e "\033[31m更新系统和包管理器失败，请检查网络或权限。\033[0m"
+        exit 1
+    fi
+}
+
+# 公共函数 - 检测并安装必要软件
+check_and_install_software() {
+    REQUIRED_SOFTWARE=("curl" "lsof")
+    for software in "${REQUIRED_SOFTWARE[@]}"; do
+        if ! command -v $software &> /dev/null; then
+            echo -e "\033[1;33m检测到 $software 未安装，正在安装...\033[0m"
+            sudo apt-get install -y $software
+            if [ $? -eq 0 ]; then
+                echo -e "\033[1;32m$software 安装成功！\033[0m"
+            else
+                echo -e "\033[31m安装 $software 失败，请检查网络或权限。\033[0m"
+                exit 1
+            fi
+        else
+            echo -e "\033[1;32m$software 已安装。\033[0m"
+        fi
+    done
+}
+
 # 显示标题和备注
 echo -e "\033[1;34m======================================\033[0m"
 echo -e "\033[1;32m       一键配置 dnsmasq 分流脚本       \033[0m"
@@ -163,6 +194,12 @@ case $main_choice in
   
   case $dnsmasq_choice in
     1)
+    # 更新系统和包管理器
+    update_system
+
+    # 检测并安装必要软件
+    check_and_install_software
+    
     # 安装并配置 dnsmasq
     echo "执行安装 dnsmasq 的相关操作..."
     
@@ -362,6 +399,12 @@ case $main_choice in
 
   case $smartdns_choice in
 1)
+# 更新系统和包管理器
+    update_system
+
+# 检测并安装必要软件
+    check_and_install_software
+    
 # 安装 smartdns
 echo -e "\033[1;34m正在安装 smartdns...\033[0m"
 apt update && apt install -y smartdns
