@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.3.1"
+VERSION="V_1.3.2"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -705,11 +705,21 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
         echo -e "\033[1;33m未检测到默认配置文件，跳过备份。\033[0m"
       fi
 
+      # 替换 SmartDNS 配置文件
       echo "替换 SmartDNS 配置文件..."
+      if [ ! -d "/etc/smartdns" ]; then
+      echo "目标目录 /etc/smartdns 不存在，正在创建..."
+      mkdir -p /etc/smartdns
+      if [ $? -ne 0 ]; then
+        echo -e "\033[31m[错误] 目标目录创建失败！\033[0m"
+        continue
+       fi
+       fi
+
       mv /tmp/smartdns.conf.sg $CONFIG_FILE
       if [ $? -ne 0 ]; then
-        echo -e "\033[31m[错误] 配置文件替换失败！\033[0m"
-        continue
+      echo -e "\033[31m[错误] 配置文件替换失败！\033[0m"
+      continue
       fi
 
       echo "重启 SmartDNS 服务..."
