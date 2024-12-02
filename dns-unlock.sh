@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.3.0"
+VERSION="V_1.3.1"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -282,9 +282,6 @@ case $main_choice in
   
   case $dnsmasq_choice in
     1)
-    # 更新系统和包管理器
-    update_system
-
     # 检测并安装必要软件
     check_and_install_software
     
@@ -525,10 +522,6 @@ case $main_choice in
   read smartdns_choice
 
   case $smartdns_choice in
-1)
-# 更新系统和包管理器
-update_system
-
 # 检测并安装必要软件
 check_and_install_software
 
