@@ -4,7 +4,7 @@
 # 请确保使用 sudo 或 root 权限运行此脚本
 
 # 脚本版本和更新时间
-VERSION="V_1.3.4"
+VERSION="V_1.3.5"
 LAST_UPDATED=$(date +"%Y-%m-%d")
 
 # 检查是否以 root 身份运行6
@@ -771,13 +771,24 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
     ;;
 
   3)
-  # 一键更换 nameserver
-  echo -e "\033[1;34m检测 /etc/resolv.conf 是否被锁定...\033[0m"
+    # 一键更换 nameserver
+  echo -e "\033[1;34m检测 /etc/resolv.conf 是否为符号链接...\033[0m"
+
+  # 检测是否为符号链接
+  if [ -L /etc/resolv.conf ]; then
+    TARGET_FILE=$(readlink -f /etc/resolv.conf)
+    echo -e "\033[1;33m检测到 /etc/resolv.conf 是符号链接，指向 $TARGET_FILE。\033[0m"
+  else
+    TARGET_FILE="/etc/resolv.conf"
+    echo -e "\033[1;32m /etc/resolv.conf 是普通文件。\033[0m"
+  fi
+
+  echo -e "\033[1;34m检测 $TARGET_FILE 是否被锁定...\033[0m"
 
   # 检测是否被锁定
-  if lsattr /etc/resolv.conf | grep -q 'i'; then
-    echo -e "\033[1;33m检测到 /etc/resolv.conf 被锁定，正在解锁...\033[0m"
-    chattr -i /etc/resolv.conf
+  if lsattr $TARGET_FILE | grep -q 'i'; then
+    echo -e "\033[1;33m检测到 $TARGET_FILE 被锁定，正在解锁...\033[0m"
+    chattr -i $TARGET_FILE
     if [ $? -eq 0 ]; then
       echo -e "\033[1;32m文件已解锁！\033[0m"
     else
@@ -798,9 +809,9 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
     exit 1
   fi
 
-  # 更新 /etc/resolv.conf 文件
-  echo -e "\033[1;34m正在更新 /etc/resolv.conf 配置...\033[0m"
-  echo "nameserver $nameserver" > /etc/resolv.conf
+  # 更新目标文件
+  echo -e "\033[1;34m正在更新 $TARGET_FILE 配置...\033[0m"
+  echo "nameserver $nameserver" > $TARGET_FILE
   if [ $? -eq 0 ]; then
     echo -e "\033[1;32m更新成功：nameserver $nameserver\033[0m"
   else
@@ -808,9 +819,9 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
     exit 1
   fi
 
-  # 锁定 /etc/resolv.conf 文件
-  echo -e "\033[1;34m正在锁定 /etc/resolv.conf...\033[0m"
-  chattr +i /etc/resolv.conf
+  # 锁定目标文件
+  echo -e "\033[1;34m正在锁定 $TARGET_FILE...\033[0m"
+  chattr +i $TARGET_FILE
   if [ $? -eq 0 ]; then
     echo -e "\033[1;32m文件已成功锁定！\033[0m"
   else
@@ -839,27 +850,38 @@ echo -e "\033[1;32msmartdns 配置已完成，服务已启动并设置为开机�
     
   5)
     # 一键恢复 8.8.8.8 并重启系统 DNS
-      echo -e "\033[1;34m检测 /etc/resolv.conf 是否被锁定...\033[0m"
-      if lsattr /etc/resolv.conf | grep -q "\-i\-"; then
-        echo -e "\033[1;33m文件已锁定，正在解锁...\033[0m"
-        chattr -i /etc/resolv.conf
-        echo -e "\033[1;32m文件已解锁，继续操作...\033[0m"
-      else
-        echo -e "\033[1;32m文件未锁定，无需解锁。\033[0m"
-      fi
+    echo -e "\033[1;34m检测 /etc/resolv.conf 是否为符号链接...\033[0m"
+    if [ -L /etc/resolv.conf ]; then
+        TARGET_FILE=$(readlink -f /etc/resolv.conf)
+        echo -e "\033[1;33m检测到 /etc/resolv.conf 是符号链接，指向 $TARGET_FILE。\033[0m"
+    else
+        TARGET_FILE="/etc/resolv.conf"
+        echo -e "\033[1;32m /etc/resolv.conf 是普通文件。\033[0m"
+    fi
 
-      echo -e "\033[1;34m备份原有的 /etc/resolv.conf 文件...\033[0m"
-      cp /etc/resolv.conf /etc/resolv.conf.bak
-      echo -e "\033[1;34m修改 /etc/resolv.conf 配置为 8.8.8.8...\033[0m"
-      echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
-      echo -e "\033[1;34m重启系统 DNS 服务...\033[0m"
-      systemctl restart systemd-resolved
-      if [ $? -eq 0 ]; then
+    echo -e "\033[1;34m检测 $TARGET_FILE 是否被锁定...\033[0m"
+    if lsattr $TARGET_FILE | grep -q "\-i\-"; then
+        echo -e "\033[1;33m文件已锁定，正在解锁...\033[0m"
+        chattr -i $TARGET_FILE
+        echo -e "\033[1;32m文件已解锁，继续操作...\033[0m"
+    else
+        echo -e "\033[1;32m文件未锁定，无需解锁。\033[0m"
+    fi
+
+    echo -e "\033[1;34m备份原有的 $TARGET_FILE 文件...\033[0m"
+    cp $TARGET_FILE $TARGET_FILE.bak
+
+    echo -e "\033[1;34m修改 $TARGET_FILE 配置为 8.8.8.8...\033[0m"
+    echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > $TARGET_FILE
+
+    echo -e "\033[1;34m重启系统 DNS 服务...\033[0m"
+    systemctl restart systemd-resolved
+    if [ $? -eq 0 ]; then
         echo -e "\033[1;32m系统 DNS 已成功设置为 8.8.8.8 并重启！\033[0m"
-      else
+    else
         echo -e "\033[31m[错误] DNS 服务重启失败，请检查配置！\033[0m"
-      fi
-      ;;
+    fi
+    ;;
       
     0)
       break
