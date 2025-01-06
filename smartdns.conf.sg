@@ -857,6 +857,7 @@ nameserver /openai.com/sg
 nameserver /chatgpt.com/sg
 nameserver /oaistatic.com/sg
 nameserver /oaiusercontent.com/sg
+nameserver /sora.com/sg
 # > ExHantai/E-hentai
 nameserver /exhentai.org/sg
 nameserver /e-hentai.org/sg
