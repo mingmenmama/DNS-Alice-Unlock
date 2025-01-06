@@ -851,6 +851,7 @@ server=/openai.com/157.20.104.47
 server=/chatgpt.com/157.20.104.47
 server=/oaistatic.com/157.20.104.47
 server=/oaiusercontent.com/157.20.104.47
+server=/sora.com/157.20.104.47
 # > ExHantai/E-hentai
 server=/exhentai.org/157.20.104.47
 server=/e-hentai.org/157.20.104.47
