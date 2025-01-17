@@ -2,8 +2,8 @@
 bind [::]:53
 
 # 设置默认的上游 DNS
-server 1.0.0.1  # 主 DNS，Cloudfare Public DNS
-server 8.8.8.8  # 备用 DNS，Google Public DNS
+server 8.8.8.8  # 主 DNS，Google Public DNS
+server 1.1.1.1  # 备用 DNS，Cloudfare Public DNS
 server 157.20.104.47 -group sg -exclude-default-group # ALice SG DNS
 server 154.12.177.22 -group hk -exclude-default-group # ALice HK DNS
 
@@ -83,11 +83,6 @@ nameserver /mobileanalytics.us-east-1.amazonaws.com/sg
 nameserver /viu.com/sg
 # > Steam Store
 nameserver /steampowered.com/sg
-# > Youtube
-nameserver /youtube.com/sg
-nameserver /youtubei.googleapis.com/sg
-# > Google Search
-nameserver /google.com/sg
 # > Instagram
 nameserver /instagram.com/sg
 # > iQiyi
@@ -879,9 +874,6 @@ nameserver /generativelanguage.googleapis.com/sg
 nameserver /copilot.microsoft.com/sg
 
 # ---------- > China Media
-# > Youtube
-nameserver /youtube.com/sg
-nameserver /youtubei.googleapis.com/sg
 # > BiliBili
 nameserver /bilibili.com/sg
 # > Netease Cloud Music
