@@ -1,8 +1,8 @@
 # 禁用读取 /etc/resolv.conf
 no-resolv
 # 设置默认的上游 DNS
-server=1.0.0.1 # 主 DNS，Cloudfare Public DNS
-server=8.8.8.8 # 备用 DNS，Google Public DNS
+server=8.8.8.8 # 主 DNS，Google Public DNS
+server=1.1.1.1 # 备用 DNS，Cloudfare Public DNS
 cache-size=2048
 local-ttl=60
 listen-address=127.0.0.1
@@ -79,18 +79,6 @@ server=/ggpht.cn/154.12.177.22
 server=/ggpht.com/154.12.177.22
 server=/googlevideo.com/154.12.177.22
 server=/gvt2.com/154.12.177.22
-# Youtube DNS解锁
-server=/withyoutube.com/154.12.177.22
-server=/youtube-nocookie.com/154.12.177.22
-server=/youtube.com/154.12.177.22
-server=/youtubeeducation.com/154.12.177.22
-server=/youtubefanfest.com/154.12.177.22
-server=/youtubegaming.com/154.12.177.22
-server=/youtubego.com/154.12.177.22
-server=/youtubei.googleapis.com/154.12.177.22
-server=/youtubekids.com/154.12.177.22
-server=/youtubemobilesupport.com/154.12.177.22
-server=/ytimg.com/154.12.177.22
 # Spotify DNS解锁
 server=/audio4-ak-spotify-com.akamaized.net/154.12.177.22
 server=/dn-spotify-experiments.conductrics.com/154.12.177.22
