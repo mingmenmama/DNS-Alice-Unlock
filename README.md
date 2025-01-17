@@ -18,7 +18,6 @@
    ```bash
    wget https://raw.githubusercontent.com/mingmenmama/DNS-Alice-Unlock/refs/heads/main/dns-unlock.sh && bash dns-unlock.sh
 
-
 ---
 
 ### 解锁方式 1-1：DNS 分流模式(dnsmasq)
