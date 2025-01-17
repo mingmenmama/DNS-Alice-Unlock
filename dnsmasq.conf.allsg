@@ -1,8 +1,8 @@
 # 禁用读取 /etc/resolv.conf
 no-resolv
 # 设置默认的上游 DNS
-server=1.0.0.1 # 主 DNS，Cloudfare Public DNS
-server=8.8.8.8 # 备用 DNS，Google Public DNS
+server=8.8.8.8 # 主 DNS，Google Public DNS
+server=1.1.1.1 # 备用 DNS，Cloudfare Public DNS
 cache-size=2048
 local-ttl=60
 listen-address=127.0.0.1
@@ -77,11 +77,6 @@ server=/mobileanalytics.us-east-1.amazonaws.com/157.20.104.47
 server=/viu.com/157.20.104.47
 # > Steam Store
 server=/steampowered.com/157.20.104.47
-# > Youtube
-server=/youtube.com/157.20.104.47
-server=/youtubei.googleapis.com/157.20.104.47
-# > Google Search
-server=/google.com/157.20.104.47
 # > Instagram
 server=/instagram.com/157.20.104.47
 # > iQiyi
@@ -861,20 +856,17 @@ server=/anthropic.com/157.20.104.47
 server=/claude.ai/157.20.104.47
 server=/claudeusercontent.com/157.20.104.47
 
-# > Google Gemini
-server=/gemini.google.com/157.20.104.47
-server=/proactivebackend-pa.googleapis.com/157.20.104.47
-# > Google AiStudio
-server=/aistudio.google.com/157.20.104.47
+# >  Gemini
+server=/gemini..com/157.20.104.47
+server=/proactivebackend-pa.apis.com/157.20.104.47
+# >  AiStudio
+server=/aistudio..com/157.20.104.47
 server=/alkalimakersuite-pa.clients6.google.com/157.20.104.47
 server=/generativelanguage.googleapis.com/157.20.104.47
 # > Microsoft Copilot For Image Generates
 server=/copilot.microsoft.com/157.20.104.47
 
 # ---------- > China Media
-# > Youtube
-server=/youtube.com/157.20.104.47
-server=/youtubei.googleapis.com/157.20.104.47
 # > BiliBili
 server=/bilibili.com/157.20.104.47
 # > Netease Cloud Music
